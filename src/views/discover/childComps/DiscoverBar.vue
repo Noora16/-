@@ -2,7 +2,7 @@
   <div class="discover-bar">
     <div v-for="(item,index) in ball" :key="index" class="discover-bar-item">
       <a :href="item.url">
-        <img :src="item.iconUrl" alt="">
+        <img :src="item.iconUrl" alt="" @load="imgLoad">
         <p>{{item.name}}</p>
       </a>
     </div>
@@ -18,6 +18,11 @@ export default {
       default() {
         return []
       }
+    }
+  },
+  methods: {
+    imgLoad() {
+      this.$emit('bar-img-load')
     }
   }
 }
@@ -44,5 +49,6 @@ export default {
   .discover-bar-item p {
     font-size: 11px;
   }
+
 </style>
 

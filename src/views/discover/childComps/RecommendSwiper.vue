@@ -2,8 +2,8 @@
   <div class="swiper-area">
     <swiper ref="mySwiper" :options="swiperOption">
       <swiper-slide v-for="(item, index) in slideList" :key="index">
-        <a :href="item.url">
-          <img :src="item.pic" class="banner-img" alt="">
+        <a :href="item.url" class="banner-link">
+          <img :src="item.pic" class="banner-img" alt="" @load="imgLoad">
           <p class="banner-text" :style="{backgroundColor: item.titleColor}">{{item.typeTitle}}</p>
         </a>
       </swiper-slide>
@@ -48,6 +48,11 @@
       Swiper,
       SwiperSlide
     },
+    methods: {
+      imgLoad() {
+        this.$emit('swiper-img-load')
+      }
+    },
     directives: {
       swiper: directive
     }
@@ -56,8 +61,11 @@
 
 <style scoped>
   .swiper-area {
-    margin: 10px 20px;
-    position: relative;
+    padding: 10px 20px;
+
+  }
+  .banner-link {
+    display: block;
   }
   .banner-img {
     border-radius: 8px;

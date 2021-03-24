@@ -23,3 +23,12 @@ export function getPlaylistsData(limit) {
     }
   })
 }
+
+export function getRecommendSong(limit) {
+  return request({
+    url: '/personalized/newsong',
+    params: {
+      limit
+    }
+  })
+}

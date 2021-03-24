@@ -1,22 +1,33 @@
 <template>
-  <div id="discover">
+  <div class="discover">
     <nav-bar>
       <template v-slot:left><img src="~assets/img/discover/more.png" alt=""  @click="showSideMenu"></template>
       <template v-slot:center><input type="search" name="search" class="search-box" @click="toSearch" placeholder="搜索歌曲/歌手/歌单/电台"></template>
       <template v-slot:right><img src="~assets/img/discover/voice.svg" alt="" class="voice"></template>
     </nav-bar>
-    <recommend-swiper :slideList="slideList"/>
-    <scroll :scrollX="true" class="ball-scroll">
-      <discover-bar :ball="ball"/>
+    <scroll :class="length>0?'wrapper2':'wrapper1'" ref="scroll" :probeType="3" :pullUpLoad="true">
+      <div class="content">
+        <recommend-swiper :slideList="slideList" @swiper-img-load="imgLoad"/>
+        <scroll :scrollX="true" class="ball-scroll">
+          <discover-bar :ball="ball" @bar-img-load="imgLoad"/>
+        </scroll>
+        <div class="title">
+          <h1>推荐歌单</h1>
+          <p>更多</p>
+        </div>
+        <scroll :scrollX="true" class="playlists-scroll">
+          <recommend-playlist :playlists="playlists" @playlist-img-load="imgLoad"/>
+        </scroll>
+        <div class="title">
+          <h1>私人定制</h1>
+          <p>更多</p>
+        </div>
+        <scroll :scrollX="true" :probeType="3" class="songs-scroll">
+          <recommend-song :songs="recommendSongs" @songs-img-load="imgLoad"/>
+        </scroll>
+      </div>
     </scroll>
-    <div class="title">
-      <h1>推荐歌单</h1>
-      <p>更多</p>
-    </div>
     
-    <scroll :scrollX="true" class="playlists-scroll">
-      <recommend-playlist :playlists="playlists"/>
-    </scroll>
   </div>
 </template>
 
@@ -26,9 +37,10 @@ import Scroll from 'components/common/scroll/Scroll.vue'
 
 import RecommendSwiper from './childComps/RecommendSwiper.vue'
 import DiscoverBar from './childComps/DiscoverBar.vue'
-import RecommendPlaylist from './childComps/RecommendPlaylist.vue'
+import RecommendPlaylist from './childComps/RecommendPlaylist.vue' 
+import RecommendSong from './childComps/RecommendSong.vue'
+import { getBannerData, getBallData, getPlaylistsData, getRecommendSong } from 'network/discover.js'
 
-import { getBannerData, getBallData, getPlaylistsData } from 'network/discover.js'
 
 
 
@@ -42,12 +54,24 @@ export default {
     DiscoverBar,
     Scroll,
     RecommendPlaylist,
+    RecommendSong,
   },
   data() {
     return {
       slideList: [],
       ball: [],
-      playlists: []
+      playlists: [],
+      recommendSongs: []
+    }
+  },
+  computed: {
+    length() {
+      return this.$store.state.songList.length
+    }
+  },
+  watch: {
+    length() {
+      this.$refs.scroll.refresh();
     }
   },
   methods: {
@@ -55,8 +79,8 @@ export default {
       this.$router.push('/search')
     },
     showSideMenu() {
-        this.$store.commit('showSideMenu', true)
-      },
+      this.$store.commit('showSideMenu', true)
+    },
     getBannerData(type) {
       getBannerData(type).then(res => {
         this.slideList = res.data.banners;
@@ -71,13 +95,23 @@ export default {
       getPlaylistsData(limit).then(res => {
         this.playlists = res.data.result;
       })
+    },
+    getRecommendSong(limit) {
+      getRecommendSong(limit).then(res => {
+        this.recommendSongs = res.data.result;
+      })
+    },
+    imgLoad() {
+      this.$refs.scroll.refresh();
     }
   },
   created() {
     this.getBannerData(2),
     this.getBallData(),
-    this.getPlaylistsData(6)
-  }
+    this.getPlaylistsData(6),
+    this.getRecommendSong(12)
+  },
+  
 }
     
 </script>
@@ -99,12 +133,7 @@ export default {
     width: 30px;
   }
 
-  .ball-scroll {
-    overflow: hidden;
-    width: 100vw;
-  }
-
-  .playlists-scroll {
+  .ball-scroll .songs-scroll .playlists-scroll {
     overflow: hidden;
     width: 100vw;
   }
@@ -113,7 +142,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 12px 20px;
   }
   .title h1 {
     font-size: 17px;
@@ -129,5 +158,23 @@ export default {
   .title p::after {
     content:">"
   }
+
+  .wrapper1 {
+    overflow: hidden;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    bottom: 49px;
+  }
+  .wrapper2 {
+    overflow: hidden;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    bottom: 98px;
+  }
+
 </style>
 

@@ -7,6 +7,9 @@ const Karaoke = () => import('views/karaoke/Karaoke')
 const Friends = () => import('views/friends/Friends')
 const Search = () => import('views/search/Search')
 const Playlist = () => import('views/playlist/Playlist')
+const CurrentSong = () => import('views/song/CurrentSong')
+const SideMenu = () => import('components/content/sidemenu/SideMenu')
+
 
 Vue.use(VueRouter)
 
@@ -17,7 +20,10 @@ const routes = [
   },
   {
     path: '/discover',
-    component: Discover
+    components: {
+      default: Discover,
+      sidebar: SideMenu
+    }
   },
   {
     path: '/search',
@@ -41,8 +47,11 @@ const routes = [
   },
   {
     path: '/playlist/:playlistId',
-    component: Playlist,
-    props: true
+    component: Playlist
+  },
+  {
+    path: '/song/:songId',
+    component: CurrentSong
   }
 ]
 

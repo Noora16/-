@@ -1,23 +1,24 @@
 <template>
   <div id="app">
-    <div class="main" :disabled="isShowSideMenu">
+    <div :disabled="isShowSideMenu">
       <router-view/>
-      <main-tab-bar/>
+      <main-tab-bar v-show="this.$route.path.indexOf('song')===-1&&this.$route.path.indexOf('playlist')===-1"/>
+      <player-bar/>
     </div>
-    <side-menu-page v-show="isShowSideMenu"/>
+    <router-view name="sidebar" v-show="isShowSideMenu" class="sidebar"/>
+    
   </div>
   
 </template>
 
 <script>
 import MainTabBar from 'components/content/mainTabbar/MainTabBar.vue'
-import SideMenuPage from 'components/content/sidemenu/SideMenuPage.vue';
-
+import PlayerBar from 'components/content/player/PlayerBar.vue'
 export default {
   name: 'App',
   components: {
     MainTabBar,
-    SideMenuPage,
+    PlayerBar
   },
   computed: {
     isShowSideMenu() {
@@ -29,4 +30,5 @@ export default {
 
 <style>
   @import url('assets/css/base.css');
+
 </style>

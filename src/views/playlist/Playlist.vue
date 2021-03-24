@@ -12,93 +12,63 @@
         <img src="~assets/img/playlist/more.svg" alt="">
       </template>
     </nav-bar>
-    <div class="playlist-info">
-      <div class="playlist-cover">
-        <img :src="coverImage" alt="" class="cover-img">
-        <div class="play-count">
-          <img src="~assets/img/playlist/play.svg" alt="" class="play-icon">
-          <span>{{playCount}}</span>
-        </div>
+    <scroll ref="scroll" :class="length>0?'wrapper2':'wrapper1'">
+      <div class="content">
+        <play-list-info @cover-img-load="imgLoad" @creator-img-load="imgLoad" :playlistInfo="playlistInfo"/>
+        <playlist-bar :tracks="playlistInfo.tracks"/>
+        <playlist-tracks :tracks="playlistInfo.tracks"/>
       </div>
-      <div class="text-info">
-        <p class="playlist-name">{{name}}</p>
-        <div class="creator">
-          <img :src="creatorImage" alt="">
-          <span>{{creatorName}}</span>
-          <span class="follow">+</span>
-        </div>
-        <p class="desc">{{description}}</p>
-      </div>
-    </div>
-    <div class="count-info">
-      <div>
-        <img src="~assets/img/playlist/subscribe.svg">
-        <span>{{subscribedCount}}</span>
-      </div>
-      <div>
-        <img src="~assets/img/playlist/comment.svg">
-        <span>{{commentCount}}</span>
-      </div>
-      <div>
-        <img src="~assets/img/playlist/share.svg">
-        <span>{{shareCount}}</span>
-      </div>
-    </div>
+    </scroll>
   </div>
 </template>
 
 <script>
 import NavBar from 'components/common/navbar/NavBar.vue'
-import { getPlaylistDetail } from 'network/playlist.js'
+import Scroll from 'components/common/scroll/Scroll.vue'
+import PlayListInfo from './childComps/PlayListInfo.vue'
+import PlaylistBar from './childComps/PlaylistBar.vue'
+import PlaylistTracks from './childComps/PlaylistTracks.vue'
+import { getPlaylistDetail, PlaylistInfo } from 'network/playlist.js'
 
 export default {
-  components: { NavBar },
   name: 'Playlist',
-  props: {
-    playlistId: {
-      type: String,
-      require: true,
-    }
+  components: {
+    NavBar,
+    Scroll,
+    PlayListInfo,
+    PlaylistBar,
+    PlaylistTracks,
   },
   data() {
     return {
-      name: '',
-      coverImage: '',
-      count: 0,
-      description: '',
-      creatorImage: '',
-      creatorName: '',
-      subscribedCount: 0,
-      commentCount: 0,
-      shareCount: 0
+      playlistInfo: {},
     }
   },
   computed: {
-    playCount() {
-      return this.count >= 10000 ? (this.count/10000).toFixed(0) + '万' : this.count.toString()
+    length() {
+      return this.$store.state.songList.length
     }
   },
+  watch: {
+    length() {
+      this.$refs.scroll.refresh()
+    }
+  },
+  created() {
+    this.getPlaylistDetail(this.$route.params.playlistId)
+  },
   methods: {
+    getPlaylistDetail(playlistId) {
+      getPlaylistDetail(playlistId).then(res => {
+        this.playlistInfo = new PlaylistInfo(res.data.playlist);
+      })
+    },
     goBack() {
       this.$router.back();
     },
-    getPlaylistDetail(playlistId) {
-      getPlaylistDetail(playlistId).then(res => {
-        this.name = res.data.playlist.name;
-        this.coverImage = res.data.playlist.coverImgUrl;
-        this.count = res.data.playlist.playCount;
-        this.description = res.data.playlist.description;
-        this.creatorImage = res.data.playlist.creator.avatarUrl;
-        this.creatorName = res.data.playlist.creator.nickname;
-        this.subscribedCount = res.data.playlist.subscribedCount;
-        this.commentCount = res.data.playlist.commentCount;
-        this.shareCount = res.data.playlist.shareCount;
-      })
+    imgLoad() {
+      this.$refs.scroll.refresh();
     }
-  },
-  beforeRouteEnter(to, from, next) {
-    next(vm => vm.getPlaylistDetail(vm.playlistId))
-    
   }
 }
 </script>
@@ -107,89 +77,25 @@ export default {
   .search {
     float: right;
   }
-  .playlist-info {
-    display: flex;
-    padding: 20px;
-    background-color: #331900;
-    color: #fff;
-    height: 200px;
-  }
-  .playlist-cover {
+  .playlist {
+    height: 100vh;
     position: relative;
+    z-index: 999;
   }
-  .cover-img {
-    width: 130px;
-    border-radius: 20px;
-    box-shadow: 0 -5px 1px rgba(147, 128, 83, 0.5);
-  }
-  .play-icon {
-    width: 15px;
-    vertical-align: middle;
-  }
-  .play-count {
-    background-color: rgba(100,100,100,0.5);
+  .wrapper1 {
+    overflow: hidden;
     position: absolute;
-    top: 3px;
-    right: 10px;
-    padding:0 2px;
-    border-radius: 6px;
-
+    top: 50px;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
-  .play-count span {
-    font-size: 11px;
-    vertical-align: middle;
-  }
-  .text-info {
-    margin-left: 20px; 
-    min-width: 0;
+  .wrapper2 {
     overflow: hidden;
-  }
-  .playlist-name {
-    font-size: 14px;
-    line-height: 1.5;
-    height: 60px;
-    vertical-align: top;
-  }
-  .creator {
-    font-size: 12px;
-    color: rgba(255,255, 255, 0.8);
-  }
-  .creator * {
-    vertical-align: middle;
-  }
-  .creator img {
-    width: 23px;
-    border-radius: 50%;
-    margin-right: 5px;
-  }
-  .follow {
-    margin-left: 5px;
-    padding: 0 10px;
-    border-radius: 8px;
-    background-color: rgba(255,255, 255, 0.5);
-  }
-  .desc {
-    color: rgba(255,255, 255, 0.8);
-    font-size: 12px;
-    margin-top: 25px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .count-info {  
-    position: relative;
-    top: -20px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background-color: #fff;
-    height: 40px;
-    width: 75%;
-    margin: 0 auto;
-    border-radius: 25px;
-    box-shadow: 0 3px 3px rgba(100,100,100,0.5);
-  }
-  .count-info img {
-    width: 20px;
+    position: absolute;
+    top: 50px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
   }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="recommend-playlists">
     <div class="playlist" v-for="(item,index) in playlists" :key="index" @click="showPlaylistDetail(item.id)">
-      <img :src="item.picUrl" alt="">
+      <img :src="item.picUrl" alt="" @load="imgLoad">
       <span class="playCount">{{count(item)}}</span>
       <p>{{item.name}}</p>
     </div>
@@ -29,7 +29,10 @@ export default {
   },
   methods: {
     showPlaylistDetail(id) {
-      this.$router.push('/playlist/'+id)
+      this.$router.push('/playlist/'+id).catch(err => err)
+    },
+    imgLoad() {
+      this.$emit('playlist-img-load')
     }
   }
 }
@@ -44,10 +47,11 @@ export default {
     width: 150vw;
     height: 116px;
     box-shadow: 0 -3px 3px var(--color-background);
+    margin-bottom: 8px;
+    overflow: hidden;
   }
   .playlist {
-    flex: 1;
-
+    width: 82px;
     position: relative;
   }
   .playCount {

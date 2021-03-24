@@ -14,8 +14,11 @@
 
 <style scoped>
   .nav-bar {
+    position: fixed;
+    top: 0;
     display: flex;
     height: 50px;
+    width: 100%;
     align-items: center;
     font-size: 19px;
     color: #fff;

@@ -31,6 +31,11 @@
         default: 20
       }
     },
+    data() {
+      return {
+        scroll: null
+      }
+    },
     mounted() {
       setTimeout(() => {
         this._initScroll()
@@ -38,9 +43,6 @@
     },
     methods: {
        _initScroll() {
-        if (!this.$refs.wrapper) {
-          return
-        }
         this.scroll = new BScroll(this.$refs.wrapper, {
           probeType: this.probeType,
           click: this.click,
@@ -52,12 +54,18 @@
             this.$emit('pullingUp')
           })
         }
+        this.scroll.on('scroll', (position) => {
+          this.$emit('scroll', position);    
+        });
       },
       refresh() {
         this.scroll && this.scroll.refresh()
       },
       scrollTo() {
         this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)
+      },
+      getScrollY(){
+        return this.scroll?this.scroll.y:0;
       },
       finishPullUp() {
         this.scroll.finishPullUp()
